@@ -1,3 +1,5 @@
+
+
 ---
 title       : Multivariable regression examples
 subtitle    : Regression Models
@@ -13,12 +15,20 @@ url:
 widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
 mode        : selfcontained # {standalone, draft}
 ---
+
+
 ```{r setup, cache = F, echo = F, message = F, warning = F, tidy = F, results='hide'}
+
+
+library(knitr)
+
 # make this an external chunk that can be included in any file
 options(width = 100)
+
 opts_chunk$set(message = F, error = F, warning = F, comment = NA, fig.align = 'center', dpi = 100, tidy = F, cache.path = '.cache/', fig.path = 'fig/')
 
 options(xtable.type = 'html')
+
 knit_hooks$set(inline = function(x) {
   if(is.numeric(x)) {
     round(x, getOption('digits'))
@@ -26,9 +36,15 @@ knit_hooks$set(inline = function(x) {
     paste(as.character(x), collapse = ', ')
   }
 })
+
 knit_hooks$set(plot = knitr:::hook_plot_html)
+
 runif(1)
+
+
 ```
+
+
 ## Data set for discussion
 ### `require(datasets); data(swiss); ?swiss`
 Standardized fertility measure and socio-economic indicators for each of 47 French-speaking provinces of Switzerland at about 1888.
@@ -44,12 +60,26 @@ A data frame with 47 observations on 6 variables, each of which is in percent, i
 
 All variables but Fertility give proportions of the population.
 
+
+
+
+
+
 ---
 
 ```{r, fig.height=6, fig.width=10, echo = FALSE}
-require(datasets); data(swiss); require(GGally); require(ggplot2)
-g = ggpairs(swiss, lower = list(continuous = "smooth"),params = c(method = "loess"))
+
+require(datasets) 
+data(swiss)
+require(GGally); 
+require(ggplot2)
+
+#g <- ggpairs(swiss, lower = list(continuous = "smooth"),params = c(method = "loess"))
+
+g <- ggpairs(swiss, lower = list(continuous = wrap("smooth", method = "lm")))
+
 g
+
 ```
 
 
@@ -74,26 +104,45 @@ summary(lm(Fertility ~ Agriculture, data = swiss))$coefficients
 ---
 How can adjustment reverse the sign of an effect? Let's try a simulation.
 ```{r, echo = TRUE}
-n <- 100; x2 <- 1 : n; x1 <- .01 * x2 + runif(n, -.1, .1); y = -x1 + x2 + rnorm(n, sd = .01)
+
+n <- 100 
+x2 <- 1:n 
+x1 <- .01 * x2 + runif(n, -.1, .1)
+
+y = -x1 + x2 + rnorm(n, sd = .01)
+
 summary(lm(y ~ x1))$coef
+
 summary(lm(y ~ x1 + x2))$coef
+
+
 ```
 
 ---
 ```{r, echo = FALSE, fig.height=5, fig.width=10, results = 'show'}
+
 dat = data.frame(y = y, x1 = x1, x2 = x2, ey = resid(lm(y ~ x2)), ex1 = resid(lm(x1 ~ x2)))
+
 library(ggplot2)
+
 g = ggplot(dat, aes(y = y, x = x1, colour = x2))
 g = g + geom_point(colour="grey50", size = 5) + geom_smooth(method = lm, se = FALSE, colour = "black") 
 g = g + geom_point(size = 4) 
+
 g
 ```
 
 ---
 ```{r, echo = FALSE, fig.height=5, fig.width=10, results = 'show'}
+
 g2 = ggplot(dat, aes(y = ey, x = ex1, colour = x2))  
-g2 = g2 + geom_point(colour="grey50", size = 5) + geom_smooth(method = lm, se = FALSE, colour = "black") + geom_point(size = 4) 
+
+g2 = g2 + geom_point(colour="grey50", size = 5) + geom_smooth(method = lm, se = FALSE, colour = "black") + 
+
+geom_point(size = 4) 
+
 g2
+
 ```
 
 ---
@@ -118,7 +167,9 @@ lm(Fertility ~ . + z, data = swiss)
 ## Dummy variables are smart
 * Consider the linear model
 $$
+
 Y_i = \beta_0 + X_{i1} \beta_1 + \epsilon_{i}
+
 $$
 where each $X_{i1}$ is binary so that it is a 1 if measurement $i$ is in a group and 0 otherwise. (Treated versus not in a clinical trial, for example.)
 * Then for people in the group $E[Y_i] = \beta_0 + \beta_1$
